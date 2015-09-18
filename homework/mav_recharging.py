@@ -62,9 +62,29 @@ class MAV(Thread):
         self._state = None
 
         # Your code here.
-
+        super(MAV, self).__init__(**kwargs)
+        self._left_electrode = left_electrode
+        self._right_electrode = right_electrode
+        self._fly_time_sec = fly_time_sec
+        self._charge_time_sec = charge_time_sec
+        
+        
     def run(self):
         # Your code here.
+        self.running = True
+        # While loop to control the fly, wait, charge cycle while the drones are running.
+        while(self.running):
+            # Change MAV state to flying, the MAV takes-off, completes its mission and returns.
+            self._state = _MAV_STATES.Flying
+            # Accepts flight time argument.
+            sleep(self._fly_time_sec)
+            # Changes MAV state to waiting.  MAV waits for free electrodes.
+            self._state = _MAV_STATES.Waiting
+          # MAV grabs and locks an electrode as it becomes available.  When two are locked, MAV charges.
+            with self._left_electrode, self._right_electrode:
+                self._state = _MAV_STATES.Charging
+                # Accepts charge time argument.
+                sleep(self._charge_time_sec)
         #
         # Fly while ``self.running`` is True. Update your state:
         self._state = _MAV_STATES.Flying
@@ -222,7 +242,7 @@ class TestMav(object):
 
     def test_2(self):
         self.fly_missions(0.10, 0.20, 2)
-#
+'''#
 # TestElectrode class
 # -------------------
 class TestElectrode(object):
@@ -249,7 +269,7 @@ class TestElectrode(object):
         with e:
             assert not e.acquire(False)
         assert e.acquire()
-#
+#'''
 # main code
 # =========
 def main():
